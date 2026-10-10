@@ -24,12 +24,24 @@
   .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
   .stats div{background:#030733;border-radius:8px;padding:8px;text-align:center;font-size:11px}
   .stats b{display:block;font-size:18px}
-  #grade{display:grid;grid-template-columns:repeat(10,1fr);gap:7px 5px}
+  #grade{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px 5px}
   .n{aspect-ratio:2.1/1;border-radius:50%;border:2.5px solid #000;background:var(--azul);color:var(--creme);
-     font-weight:800;font-size:clamp(9px,2.7vw,13px);cursor:pointer;padding:0;display:grid;place-content:center;position:relative}
+     font-weight:800;font-size:clamp(8px,2.5vw,13px);cursor:pointer;padding:0;min-width:0;overflow:hidden;display:grid;place-content:center;position:relative}
   .n.reservado{background:repeating-linear-gradient(45deg,#2b3390 0 3px,var(--azul) 3px 7px);border-color:var(--creme)}
   .n.pago{background:var(--creme);color:var(--azul)}
   .n.tem-nome::after{content:"";position:absolute;right:3px;top:2px;width:5px;height:5px;border-radius:50%;background:#ff8a5c}
+  .multi{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .multi .btn{padding:9px 14px;font-size:13px}
+  .multi .btn[aria-pressed="true"]{background:var(--creme);color:var(--azul)}
+  .multi .sub{margin:0;font-size:12px}
+  .n.sel{outline:3px solid #fff;outline-offset:1px;z-index:1}
+  #sel-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:5;background:#030733;border-top:2px solid var(--creme);
+    padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px));align-items:center;gap:8px}
+  #sel-bar .info{flex:1;font-weight:800;font-size:15px}
+  #sel-bar .btn{padding:11px 14px}
+  #sel-bar .btn:disabled{opacity:.4;cursor:default}
+  body.com-barra{padding-bottom:90px}
+  #dlg-lista{display:none;font-size:12px;margin:-6px 0 12px;max-height:64px;overflow:auto;opacity:.85}
   dialog{border:0;border-radius:14px;background:var(--creme);color:var(--azul);padding:20px;width:min(92vw,360px)}
   dialog::backdrop{background:rgba(0,0,20,.7)}
   dialog h2{margin:0 0 12px;font-size:20px}
@@ -65,12 +77,23 @@
       <div><b id="s-pago">0</b>pagos</div>
       <div><b id="s-grana">R$0</b>arrecadado</div>
     </div>
+    <div class="multi">
+      <button class="btn sec" id="multi" aria-pressed="false">Selecionar vários</button>
+      <p class="sub" id="dica"></p>
+    </div>
     <div id="grade"></div>
   </section>
 </main>
 
+<div id="sel-bar">
+  <span class="info" id="sel-n">0 selecionados</span>
+  <button class="btn sec" id="sel-limpar">Limpar</button>
+  <button class="btn" id="sel-ok" disabled>Confirmar</button>
+</div>
+
 <dialog id="dlg">
   <h2 id="dlg-titulo">Número</h2>
+  <p id="dlg-lista"></p>
   <div class="opcoes" id="opcoes">
     <button data-s="livre">Livre</button>
     <button data-s="reservado">Reservado</button>
@@ -89,12 +112,13 @@
 (function(){
   const C = window.RIFA, $ = id => document.getElementById(id);
   const db = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
-  let estado = {}, nomes = {}, atual = null, statusSel = "livre";
+  let estado = {}, nomes = {}, alvo = [], statusSel = "livre";
+  let multi = false, sel = new Set(), ultimo = null;
 
   const grade = $("grade"), celulas = {};
   for (let i = 1; i <= C.TOTAL; i++){
     const b = document.createElement("button");
-    b.className = "n"; b.textContent = i; b.onclick = () => abrir(i);
+    b.className = "n"; b.textContent = i; b.onclick = e => clicar(i, e);
     grade.appendChild(b); celulas[i] = b;
   }
 
@@ -120,7 +144,7 @@
     let l=0,r=0,p=0;
     for (let i=1;i<=C.TOTAL;i++){
       const s = estado[i] || "livre";
-      celulas[i].className = "n " + s + (nomes[i] ? " tem-nome" : "");
+      celulas[i].className = "n " + s + (nomes[i] ? " tem-nome" : "") + (sel.has(i) ? " sel" : "");
       celulas[i].title = nomes[i] || "";
       if (s==="livre") l++; else if (s==="reservado") r++; else p++;
     }
@@ -134,29 +158,71 @@
   }
   document.querySelectorAll("#opcoes button").forEach(b => b.onclick = () => marcar(b.dataset.s));
 
-  function abrir(n){
-    atual = n;
-    $("dlg-titulo").textContent = "Número " + n;
-    $("nome").value = nomes[n] || "";
-    marcar(estado[n] || "livre");
+  // ---------- seleção em massa ----------
+  function setMulti(on){
+    multi = on; if (!on){ sel.clear(); ultimo = null; }
+    $("multi").setAttribute("aria-pressed", on);
+    $("multi").textContent = on ? "Sair da seleção" : "Selecionar vários";
+    $("dica").textContent = on ? "Toque nos números e confirme." : "Ou segure Ctrl e clique.";
+    atualizarSel();
+  }
+  function atualizarSel(){
+    const n = sel.size;
+    $("sel-n").textContent = n === 1 ? "1 selecionado" : n + " selecionados";
+    $("sel-ok").disabled = n === 0;
+    $("sel-bar").style.display = multi ? "flex" : "none";
+    document.body.classList.toggle("com-barra", multi);
+    pintar();
+  }
+  function clicar(i, e){
+    if (multi || e.ctrlKey || e.metaKey || e.shiftKey){
+      if (!multi) setMulti(true);
+      if (e.shiftKey && ultimo){                       // Shift: seleciona do último até este
+        const [a, b] = [Math.min(ultimo, i), Math.max(ultimo, i)];
+        for (let k = a; k <= b; k++) sel.add(k);
+      } else if (sel.has(i)) sel.delete(i); else sel.add(i);
+      ultimo = i; atualizarSel();
+    } else abrir([i]);
+  }
+  $("multi").onclick = () => setMulti(!multi);
+  $("sel-limpar").onclick = () => { sel.clear(); ultimo = null; atualizarSel(); };
+  $("sel-ok").onclick = () => abrir([...sel].sort((a,b) => a-b));
+  setMulti(false);
+
+  function abrir(lista){
+    alvo = lista;
+    const um = lista.length === 1;
+    $("dlg-titulo").textContent = um ? "Número " + lista[0] : lista.length + " números";
+    $("dlg-lista").style.display = um ? "none" : "block";
+    $("dlg-lista").textContent = lista.join(", ");
+    $("nome").placeholder = um ? "Nome de quem comprou (opcional)" : "Nome de quem comprou (vale para todos)";
+    const nms = [...new Set(lista.map(n => nomes[n] || ""))];
+    $("nome").value = nms.length === 1 ? nms[0] : "";
+    const sts = [...new Set(lista.map(n => estado[n] || "livre"))];
+    marcar(um ? sts[0] : (sts.length === 1 && sts[0] !== "livre" ? sts[0] : "pago"));
     $("dlg").showModal();
   }
   $("cancelar").onclick = () => $("dlg").close();
 
   $("salvar").onclick = async () => {
-    const n = atual, nome = $("nome").value.trim();
+    const lista = alvo, um = lista.length === 1, nome = $("nome").value.trim();
     $("salvar").disabled = true;
-    const u = await db.from("rifa").update({status: statusSel, updated_at: new Date().toISOString()}).eq("numero", n);
+    const u = await db.from("rifa").update({status: statusSel, updated_at: new Date().toISOString()}).in("numero", lista);
     let e2 = null;
     if (!u.error){
-      if (statusSel === "livre" || !nome) e2 = (await db.from("rifa_nomes").delete().eq("numero", n)).error;
-      else e2 = (await db.from("rifa_nomes").upsert({numero:n, nome})).error;
+      if (statusSel === "livre" || (um && !nome)) e2 = (await db.from("rifa_nomes").delete().in("numero", lista)).error;
+      else if (nome) e2 = (await db.from("rifa_nomes").upsert(lista.map(n => ({numero:n, nome})))).error;
+      // vários números sem nome digitado: mantém os nomes que já existiam
     }
     $("salvar").disabled = false;
     if (u.error || e2){ alert("Não salvou: " + (u.error||e2).message); return; }
-    estado[n] = statusSel;
-    if (statusSel !== "livre" && nome) nomes[n] = nome; else delete nomes[n];
-    pintar(); $("dlg").close();
+    lista.forEach(n => {
+      estado[n] = statusSel;
+      if (statusSel === "livre" || (um && !nome)) delete nomes[n];
+      else if (nome) nomes[n] = nome;
+    });
+    $("dlg").close();
+    if (multi) setMulti(false); else pintar();
   };
 
   $("entrar").onclick = async () => {
