@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rifa do Terceirão</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet">
+<style>
+  :root{--azul:#020c59;--creme:#fdf1c4}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--azul);font-family:Montserrat,system-ui,sans-serif}
+  main{max-width:540px;margin:0 auto}
+  #folha{position:relative;width:100%;aspect-ratio:810 / 1440;background:var(--azul)}
+  #folha img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none}
+
+  /* bolinha que tapa o número, no estilo do emoji do WhatsApp */
+  .bola{
+    position:absolute; width:4.7%; aspect-ratio:1; transform:translate(-50%,-50%);
+    border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle at 36% 28%,#8cc1ff 0%,#4a98f5 38%,#2368d9 78%,#1a52b5 100%);
+    box-shadow:0 .12em .22em rgba(0,0,0,.45), inset 0 -.08em .12em rgba(0,20,90,.35);
+    animation:entra .35s ease-out;
+  }
+  .bola.reservado{
+    background:radial-gradient(circle at 36% 28%,#ffe9a0 0%,#f8c44a 40%,#e39a17 80%,#c07a08 100%);
+    box-shadow:0 .12em .22em rgba(0,0,0,.45), inset 0 -.08em .12em rgba(110,60,0,.35);
+  }
+  @keyframes entra{from{transform:translate(-50%,-50%) scale(.3);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+  @media (prefers-reduced-motion:reduce){.bola{animation:none}}
+
+  /* botão colado logo abaixo do Pix, alinhado à direita */
+  .pix-btn{display:flex;justify-content:flex-end;padding:0 4% 24px;margin-top:10px}
+  button{font:inherit;font-weight:800;font-size:13px;cursor:pointer;background:var(--creme);color:var(--azul);
+    border:0;border-radius:20px;padding:8px 16px}
+  button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+</style>
+</head>
+<body>
+<main>
+  <div id="folha">
+    <img src="rifa.webp" alt="Rifa do Terceirão: 200 números a R$3,00 cada. Prêmio: 1 kit Natura. Sorteio dia 01/12." width="1080" height="1920">
+  </div>
+  <div class="pix-btn"><button id="copiar" type="button">Copiar chave Pix</button></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  const C = window.RIFA, $ = id => document.getElementById(id);
+  // posição (x%, y%) de cada número, do 1 ao 200, tirada do layout original
+  const POS = [[7.28,20.36],[16.63,20.36],[26.11,20.39],[35.68,20.39],[45.24,20.41],[54.57,20.36],[64.17,20.39],[73.79,20.39],[83.31,20.36],[92.99,20.41],[7.29,23.32],[16.63,23.32],[26.01,23.26],[35.75,23.26],[45.14,23.26],[54.47,23.26],[64.07,23.26],[73.69,23.26],[83.21,23.26],[92.89,23.26],[6.79,26.17],[16.7,26.28],[26.01,26.17],[35.75,26.17],[45.14,26.17],[54.47,26.17],[64.07,26.17],[73.69,26.17],[83.21,26.17],[92.89,26.17],[7.13,29.18],[16.61,29.07],[26.01,29.07],[35.76,29.07],[45.14,29.07],[54.47,29.07],[64.07,29.07],[73.69,29.07],[83.21,29.07],[92.89,29.07],[6.83,31.97],[16.61,31.97],[26.01,31.97],[35.75,31.97],[45.14,31.97],[54.47,31.97],[64.07,31.97],[73.69,31.97],[83.21,31.97],[92.89,31.97],[7.16,34.87],[16.61,34.87],[26.01,34.87],[35.75,34.87],[45.14,34.87],[54.47,34.87],[64.07,34.87],[73.69,34.87],[83.21,34.87],[92.89,34.87],[6.83,37.82],[16.61,37.77],[26.01,37.77],[35.75,37.77],[45.14,37.77],[54.47,37.77],[64.07,37.77],[73.69,37.77],[83.21,37.77],[92.89,37.77],[6.83,40.78],[16.61,40.67],[26.01,40.67],[35.76,40.67],[45.14,40.67],[54.46,40.67],[64.07,40.67],[73.69,40.67],[83.21,40.67],[92.89,40.67],[7.32,43.68],[16.61,43.57],[26.01,43.57],[35.76,43.57],[45.14,43.57],[54.46,43.57],[64.07,43.57],[73.69,43.57],[83.21,43.57],[92.99,43.68],[7.07,46.58],[16.6,46.58],[26.32,46.58],[35.75,46.58],[45.14,46.58],[54.64,46.58],[64.23,46.58],[73.81,46.58],[83.31,46.58],[92.99,46.59],[7.28,49.51],[16.63,49.51],[26.11,49.54],[35.68,49.54],[45.24,49.57],[54.57,49.51],[64.17,49.54],[73.79,49.54],[83.31,49.51],[92.99,49.57],[7.29,52.48],[16.63,52.48],[26.01,52.42],[35.76,52.42],[45.14,52.42],[54.47,52.42],[64.07,52.42],[73.69,52.42],[83.21,52.42],[92.89,52.42],[6.79,55.33],[16.7,55.43],[26.01,55.33],[35.76,55.33],[45.14,55.33],[54.47,55.33],[64.07,55.33],[73.69,55.33],[83.21,55.33],[92.89,55.33],[7.13,58.33],[16.61,58.23],[26.01,58.23],[35.76,58.23],[45.14,58.23],[54.46,58.23],[64.07,58.23],[73.69,58.23],[83.21,58.23],[92.89,58.23],[6.83,61.13],[16.61,61.13],[26.01,61.13],[35.76,61.13],[45.14,61.13],[54.47,61.13],[64.07,61.13],[73.69,61.13],[83.21,61.13],[92.89,61.13],[7.16,64.03],[16.61,64.03],[26.01,64.03],[35.75,64.03],[45.14,64.03],[54.47,64.03],[64.07,64.03],[73.69,64.03],[83.21,64.03],[92.89,64.03],[6.83,66.97],[16.61,66.93],[26.01,66.93],[35.76,66.93],[45.14,66.93],[54.47,66.93],[64.07,66.93],[73.69,66.93],[83.21,66.93],[92.89,66.93],[6.83,69.93],[16.61,69.83],[26.01,69.83],[35.75,69.83],[45.14,69.83],[54.47,69.83],[64.07,69.83],[73.69,69.83],[83.21,69.83],[92.89,69.83],[7.33,72.83],[16.61,72.73],[26.01,72.73],[35.76,72.73],[45.14,72.73],[54.46,72.73],[64.07,72.73],[73.69,72.73],[83.21,72.73],[92.99,72.83],[7.07,75.73],[16.6,75.73],[26.32,75.73],[35.76,75.73],[45.14,75.73],[54.64,75.73],[64.23,75.73],[73.81,75.73],[83.31,75.73],[92.99,75.75]];
+  const folha = $("folha"), bolas = {};
+
+  function pintar(linhas){
+    linhas.forEach(r => {
+      const n = r.numero, p = POS[n-1];
+      if (!p) return;
+      if (r.status === "livre"){
+        if (bolas[n]){ bolas[n].remove(); delete bolas[n]; }
+        return;
+      }
+      let b = bolas[n];
+      if (!b){
+        b = document.createElement("span");
+        b.setAttribute("aria-hidden","true");
+        b.style.left = p[0] + "%"; b.style.top = p[1] + "%";
+        folha.appendChild(b); bolas[n] = b;
+      }
+      b.className = "bola " + r.status;
+    });
+  }
+
+  $("copiar").onclick = async e => {
+    const limpo = C.PIX.replace(/\D/g, "");
+    try { await navigator.clipboard.writeText(limpo); e.target.textContent = "Copiado!"; }
+    catch(_){ e.target.textContent = "Pix: " + limpo; }
+    setTimeout(() => e.target.textContent = "Copiar chave Pix", 2500);
+  };
+
+  const db = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+  async function carregar(){
+    const { data, error } = await db.from("rifa").select("numero,status").order("numero");
+    if (!error) pintar(data);
+  }
+  carregar();
+  db.channel("rifa-publica").on("postgres_changes",{event:"*",schema:"public",table:"rifa"},carregar).subscribe();
+  setInterval(carregar, 30000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) carregar(); });
+})();
+</script>
+</body>
+</html>
