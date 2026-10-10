@@ -3,106 +3,65 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex,nofollow">
-<title>Admin · Rifa do Terceirão</title>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&display=swap" rel="stylesheet">
+<title>Rifa do Terceirão</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@800&display=swap" rel="stylesheet">
 <style>
-  :root{--azul:#040b5c;--azul-2:#0a1470;--creme:#fdf1c4}
+  :root{--azul:#020c59;--creme:#fdf1c4}
   *{box-sizing:border-box}
-  body{margin:0;background:var(--azul);color:var(--creme);font-family:Montserrat,system-ui,sans-serif;padding:20px 12px 40px}
-  main{max-width:560px;margin:0 auto}
-  h1{font-size:22px;margin:0 0 4px}
-  .sub{margin:0 0 16px;font-size:13px;opacity:.8}
-  input,button{font:inherit}
-  input{width:100%;padding:12px;border-radius:8px;border:2px solid var(--creme);background:#030733;color:var(--creme);margin-bottom:10px}
-  .btn{background:var(--creme);color:var(--azul);border:0;border-radius:8px;padding:12px 16px;font-weight:800;cursor:pointer}
-  .btn.sec{background:transparent;color:var(--creme);border:2px solid var(--creme)}
-  .btn:focus-visible,input:focus-visible,.n:focus-visible{outline:3px solid #fff;outline-offset:2px}
-  #login{max-width:360px;margin:60px auto}
-  #app{display:none}
-  .topo{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
-  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
-  .stats div{background:#030733;border-radius:8px;padding:8px;text-align:center;font-size:11px}
-  .stats b{display:block;font-size:18px}
-  #grade{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px 5px}
-  .n{aspect-ratio:2.1/1;border-radius:50%;border:2.5px solid #000;background:var(--azul);color:var(--creme);
-     font-weight:800;font-size:clamp(8px,2.5vw,13px);cursor:pointer;padding:0;min-width:0;overflow:hidden;display:grid;place-content:center;position:relative}
-  .n.reservado{background:repeating-linear-gradient(45deg,#2b3390 0 3px,var(--azul) 3px 7px);border-color:var(--creme)}
-  .n.pago{background:var(--creme);color:var(--azul)}
-  .n.tem-nome::after{content:"";position:absolute;right:3px;top:2px;width:5px;height:5px;border-radius:50%;background:#ff8a5c}
-  .multi{display:flex;align-items:center;gap:10px;margin-bottom:12px}
-  .multi .btn{padding:9px 14px;font-size:13px}
-  .multi .btn[aria-pressed="true"]{background:var(--creme);color:var(--azul)}
-  .multi .sub{margin:0;font-size:12px}
-  .n.sel{outline:3px solid #fff;outline-offset:1px;z-index:1}
-  #sel-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:5;background:#030733;border-top:2px solid var(--creme);
-    padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px));align-items:center;gap:8px}
-  #sel-bar .info{flex:1;font-weight:800;font-size:15px}
-  #sel-bar .btn{padding:11px 14px}
-  #sel-bar .btn:disabled{opacity:.4;cursor:default}
-  body.com-barra{padding-bottom:90px}
-  #dlg-lista{display:none;font-size:12px;margin:-6px 0 12px;max-height:64px;overflow:auto;opacity:.85}
-  dialog{border:0;border-radius:14px;background:var(--creme);color:var(--azul);padding:20px;width:min(92vw,360px)}
-  dialog::backdrop{background:rgba(0,0,20,.7)}
+  body{margin:0;background:var(--azul);font-family:Montserrat,system-ui,sans-serif}
+  main{max-width:540px;margin:0 auto}
+  #folha{position:relative;width:100%;aspect-ratio:810 / 1440;background:var(--azul)}
+  #folha img{position:absolute;inset:0;width:100%;height:100%;display:block;user-select:none;-webkit-user-drag:none}
+
+  /* bolinha que tapa o número, no estilo do emoji do WhatsApp */
+  .bola{
+    position:absolute; width:4%; aspect-ratio:1; transform:translate(-50%,-50%);
+    border-radius:50%; pointer-events:none;
+    background:radial-gradient(circle at 36% 28%,#8cc1ff 0%,#4a98f5 38%,#2368d9 78%,#1a52b5 100%);
+    box-shadow:0 .12em .22em rgba(0,0,0,.45), inset 0 -.08em .12em rgba(0,20,90,.35);
+    animation:entra .35s ease-out;
+  }
+  .bola.reservado{
+    background:radial-gradient(circle at 36% 28%,#ffe9a0 0%,#f8c44a 40%,#e39a17 80%,#c07a08 100%);
+    box-shadow:0 .12em .22em rgba(0,0,0,.45), inset 0 -.08em .12em rgba(110,60,0,.35);
+  }
+  @keyframes entra{from{transform:translate(-50%,-50%) scale(.3);opacity:0}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+  @media (prefers-reduced-motion:reduce){.bola{animation:none}}
+
+  /* botão colado logo abaixo do Pix, alinhado à direita */
+  .pix-btn{display:flex;justify-content:space-between;gap:10px;padding:0 4% 24px;margin-top:10px}
+  button{font:inherit;font-weight:800;font-size:13px;cursor:pointer;background:var(--creme);color:var(--azul);
+    border:0;border-radius:20px;padding:8px 16px}
+  button:focus-visible{outline:3px solid #fff;outline-offset:3px}
+  dialog{border:0;border-radius:14px;background:var(--creme);color:var(--azul);padding:18px;width:min(94vw,420px)}
+  dialog::backdrop{background:rgba(0,0,20,.75)}
   dialog h2{margin:0 0 12px;font-size:20px}
-  dialog input{background:#fff;color:var(--azul);border-color:var(--azul)}
-  .opcoes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
-  .opcoes button{padding:10px 4px;border-radius:8px;border:2px solid var(--azul);background:transparent;color:var(--azul);font-weight:700;cursor:pointer}
-  .opcoes button[aria-pressed="true"]{background:var(--azul);color:var(--creme)}
+  dialog img{width:100%;border-radius:8px;display:block;margin-bottom:10px;background:var(--azul)}
+  dialog .dica{font-size:12px;margin:0 0 12px;opacity:.8}
   .acoes{display:flex;gap:8px}
-  .acoes .btn{flex:1}
-  dialog .btn.sec{color:var(--azul);border-color:var(--azul)}
-  #msg{font-size:13px;min-height:18px;color:#ffb4a2}
+  .acoes button{flex:1;padding:11px 8px}
+  .acoes .sec{background:transparent;color:var(--azul);border:2px solid var(--azul)}
 </style>
 </head>
 <body>
 <main>
-  <section id="login">
-    <h1>Entrar</h1>
-    <p class="sub">Área restrita da rifa.</p>
-    <input id="email" type="email" placeholder="E-mail" autocomplete="username">
-    <input id="senha" type="password" placeholder="Senha" autocomplete="current-password">
-    <button class="btn" id="entrar" style="width:100%">Entrar</button>
-    <p id="msg"></p>
-  </section>
-
-  <section id="app">
-    <div class="topo">
-      <div><h1>Rifa do Terceirão</h1><p class="sub" style="margin:0">Toque num número para alterar.</p></div>
-      <button class="btn sec" id="sair">Sair</button>
-    </div>
-    <div class="stats">
-      <div><b id="s-livre">0</b>livres</div>
-      <div><b id="s-res">0</b>reservados</div>
-      <div><b id="s-pago">0</b>pagos</div>
-      <div><b id="s-grana">R$0</b>arrecadado</div>
-    </div>
-    <div class="multi">
-      <button class="btn sec" id="multi" aria-pressed="false">Selecionar vários</button>
-      <p class="sub" id="dica"></p>
-    </div>
-    <div id="grade"></div>
-  </section>
+  <div id="folha">
+    <img src="rifa.webp" alt="Rifa do Terceirão: 200 números a R$3,00 cada. Prêmio: 1 kit Natura. Sorteio dia 01/12." width="1080" height="1920">
+  </div>
+  <div class="pix-btn">
+    <button id="gerar" type="button">Gerar imagem</button>
+    <button id="copiar" type="button">Copiar chave Pix</button>
+  </div>
 </main>
 
-<div id="sel-bar">
-  <span class="info" id="sel-n">0 selecionados</span>
-  <button class="btn sec" id="sel-limpar">Limpar</button>
-  <button class="btn" id="sel-ok" disabled>Confirmar</button>
-</div>
-
-<dialog id="dlg">
-  <h2 id="dlg-titulo">Número</h2>
-  <p id="dlg-lista"></p>
-  <div class="opcoes" id="opcoes">
-    <button data-s="livre">Livre</button>
-    <button data-s="reservado">Reservado</button>
-    <button data-s="pago">Pago</button>
-  </div>
-  <input id="nome" type="text" placeholder="Nome de quem comprou (opcional)">
+<dialog id="dlg-img">
+  <h2>Rifa atualizada</h2>
+  <img id="prev" alt="Rifa do Terceirão atualizada">
+  <p class="dica">Se o botão não abrir o WhatsApp, segure o dedo na imagem e escolha salvar.</p>
   <div class="acoes">
-    <button class="btn sec" id="cancelar">Cancelar</button>
-    <button class="btn" id="salvar">Salvar</button>
+    <button class="sec" id="img-fechar" type="button">Fechar</button>
+    <button class="sec" id="img-baixar" type="button">Baixar</button>
+    <button id="img-enviar" type="button">Compartilhar</button>
   </div>
 </dialog>
 
@@ -111,130 +70,100 @@
 <script>
 (function(){
   const C = window.RIFA, $ = id => document.getElementById(id);
-  const db = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
-  let estado = {}, nomes = {}, alvo = [], statusSel = "livre";
-  let multi = false, sel = new Set(), ultimo = null;
+  // posição (x%, y%) de cada número, do 1 ao 200, tirada do layout original
+  const POS = [[7.28,20.85],[16.63,20.85],[26.11,20.85],[35.68,20.85],[45.24,20.85],[54.57,20.85],[64.17,20.85],[73.79,20.85],[83.31,20.85],[92.99,20.85],[7.29,23.75],[16.63,23.75],[26.01,23.75],[35.75,23.75],[45.14,23.75],[54.47,23.75],[64.07,23.75],[73.69,23.75],[83.21,23.75],[92.89,23.75],[6.79,26.65],[16.7,26.65],[26.01,26.65],[35.75,26.65],[45.14,26.65],[54.47,26.65],[64.07,26.65],[73.69,26.65],[83.21,26.65],[92.89,26.65],[7.13,29.55],[16.61,29.55],[26.01,29.55],[35.76,29.55],[45.14,29.55],[54.47,29.55],[64.07,29.55],[73.69,29.55],[83.21,29.55],[92.89,29.55],[6.83,32.45],[16.61,32.45],[26.01,32.45],[35.75,32.45],[45.14,32.45],[54.47,32.45],[64.07,32.45],[73.69,32.45],[83.21,32.45],[92.89,32.45],[7.16,35.34],[16.61,35.34],[26.01,35.34],[35.75,35.34],[45.14,35.34],[54.47,35.34],[64.07,35.34],[73.69,35.34],[83.21,35.34],[92.89,35.34],[6.83,38.26],[16.61,38.26],[26.01,38.26],[35.75,38.26],[45.14,38.26],[54.47,38.26],[64.07,38.26],[73.69,38.26],[83.21,38.26],[92.89,38.26],[6.83,41.15],[16.61,41.15],[26.01,41.15],[35.76,41.15],[45.14,41.15],[54.46,41.15],[64.07,41.15],[73.69,41.15],[83.21,41.15],[92.89,41.15],[7.32,44.05],[16.61,44.05],[26.01,44.05],[35.76,44.05],[45.14,44.05],[54.46,44.05],[64.07,44.05],[73.69,44.05],[83.21,44.05],[92.99,44.05],[7.07,46.95],[16.6,46.95],[26.32,46.95],[35.75,46.95],[45.14,46.95],[54.64,46.95],[64.23,46.95],[73.81,46.95],[83.31,46.95],[92.99,46.95],[7.28,50.01],[16.63,50.01],[26.11,50.01],[35.68,50.01],[45.24,50.01],[54.57,50.01],[64.17,50.01],[73.79,50.01],[83.31,50.01],[92.99,50.01],[7.29,52.9],[16.63,52.9],[26.01,52.9],[35.76,52.9],[45.14,52.9],[54.47,52.9],[64.07,52.9],[73.69,52.9],[83.21,52.9],[92.89,52.9],[6.79,55.81],[16.7,55.81],[26.01,55.81],[35.76,55.81],[45.14,55.81],[54.47,55.81],[64.07,55.81],[73.69,55.81],[83.21,55.81],[92.89,55.81],[7.13,58.7],[16.61,58.7],[26.01,58.7],[35.76,58.7],[45.14,58.7],[54.46,58.7],[64.07,58.7],[73.69,58.7],[83.21,58.7],[92.89,58.7],[6.83,61.6],[16.61,61.6],[26.01,61.6],[35.76,61.6],[45.14,61.6],[54.47,61.6],[64.07,61.6],[73.69,61.6],[83.21,61.6],[92.89,61.6],[7.16,64.51],[16.61,64.51],[26.01,64.51],[35.75,64.51],[45.14,64.51],[54.47,64.51],[64.07,64.51],[73.69,64.51],[83.21,64.51],[92.89,64.51],[6.83,67.41],[16.61,67.41],[26.01,67.41],[35.76,67.41],[45.14,67.41],[54.47,67.41],[64.07,67.41],[73.69,67.41],[83.21,67.41],[92.89,67.41],[6.83,70.3],[16.61,70.3],[26.01,70.3],[35.75,70.3],[45.14,70.3],[54.47,70.3],[64.07,70.3],[73.69,70.3],[83.21,70.3],[92.89,70.3],[7.33,73.2],[16.61,73.2],[26.01,73.2],[35.76,73.2],[45.14,73.2],[54.46,73.2],[64.07,73.2],[73.69,73.2],[83.21,73.2],[92.99,73.2],[7.07,76.11],[16.6,76.11],[26.32,76.11],[35.76,76.11],[45.14,76.11],[54.64,76.11],[64.23,76.11],[73.81,76.11],[83.31,76.11],[92.99,76.11]];
+  const folha = $("folha"), bolas = {}, estado = {};
 
-  const grade = $("grade"), celulas = {};
-  for (let i = 1; i <= C.TOTAL; i++){
-    const b = document.createElement("button");
-    b.className = "n"; b.textContent = i; b.onclick = e => clicar(i, e);
-    grade.appendChild(b); celulas[i] = b;
-  }
-
-  async function entrarApp(){
-    $("login").style.display = "none"; $("app").style.display = "block";
-    await carregar();
-    db.channel("rifa-admin").on("postgres_changes",{event:"*",schema:"public",table:"rifa"},carregar).subscribe();
-  }
-
-  async function carregar(){
-    const [a, b] = await Promise.all([
-      db.from("rifa").select("numero,status"),
-      db.from("rifa_nomes").select("numero,nome")
-    ]);
-    if (a.error || b.error){ alert("Erro ao carregar: " + (a.error||b.error).message); return; }
-    estado = {}; nomes = {};
-    a.data.forEach(r => estado[r.numero] = r.status);
-    b.data.forEach(r => { if (r.nome) nomes[r.numero] = r.nome; });
-    pintar();
-  }
-
-  function pintar(){
-    let l=0,r=0,p=0;
-    for (let i=1;i<=C.TOTAL;i++){
-      const s = estado[i] || "livre";
-      celulas[i].className = "n " + s + (nomes[i] ? " tem-nome" : "") + (sel.has(i) ? " sel" : "");
-      celulas[i].title = nomes[i] || "";
-      if (s==="livre") l++; else if (s==="reservado") r++; else p++;
-    }
-    $("s-livre").textContent=l; $("s-res").textContent=r; $("s-pago").textContent=p;
-    $("s-grana").textContent = "R$" + (p*C.PRECO);
-  }
-
-  function marcar(s){
-    statusSel = s;
-    document.querySelectorAll("#opcoes button").forEach(b => b.setAttribute("aria-pressed", b.dataset.s===s));
-  }
-  document.querySelectorAll("#opcoes button").forEach(b => b.onclick = () => marcar(b.dataset.s));
-
-  // ---------- seleção em massa ----------
-  function setMulti(on){
-    multi = on; if (!on){ sel.clear(); ultimo = null; }
-    $("multi").setAttribute("aria-pressed", on);
-    $("multi").textContent = on ? "Sair da seleção" : "Selecionar vários";
-    $("dica").textContent = on ? "Toque nos números e confirme." : "Ou segure Ctrl e clique.";
-    atualizarSel();
-  }
-  function atualizarSel(){
-    const n = sel.size;
-    $("sel-n").textContent = n === 1 ? "1 selecionado" : n + " selecionados";
-    $("sel-ok").disabled = n === 0;
-    $("sel-bar").style.display = multi ? "flex" : "none";
-    document.body.classList.toggle("com-barra", multi);
-    pintar();
-  }
-  function clicar(i, e){
-    if (multi || e.ctrlKey || e.metaKey || e.shiftKey){
-      if (!multi) setMulti(true);
-      if (e.shiftKey && ultimo){                       // Shift: seleciona do último até este
-        const [a, b] = [Math.min(ultimo, i), Math.max(ultimo, i)];
-        for (let k = a; k <= b; k++) sel.add(k);
-      } else if (sel.has(i)) sel.delete(i); else sel.add(i);
-      ultimo = i; atualizarSel();
-    } else abrir([i]);
-  }
-  $("multi").onclick = () => setMulti(!multi);
-  $("sel-limpar").onclick = () => { sel.clear(); ultimo = null; atualizarSel(); };
-  $("sel-ok").onclick = () => abrir([...sel].sort((a,b) => a-b));
-  setMulti(false);
-
-  function abrir(lista){
-    alvo = lista;
-    const um = lista.length === 1;
-    $("dlg-titulo").textContent = um ? "Número " + lista[0] : lista.length + " números";
-    $("dlg-lista").style.display = um ? "none" : "block";
-    $("dlg-lista").textContent = lista.join(", ");
-    $("nome").placeholder = um ? "Nome de quem comprou (opcional)" : "Nome de quem comprou (vale para todos)";
-    const nms = [...new Set(lista.map(n => nomes[n] || ""))];
-    $("nome").value = nms.length === 1 ? nms[0] : "";
-    const sts = [...new Set(lista.map(n => estado[n] || "livre"))];
-    marcar(um ? sts[0] : (sts.length === 1 && sts[0] !== "livre" ? sts[0] : "pago"));
-    $("dlg").showModal();
-  }
-  $("cancelar").onclick = () => $("dlg").close();
-
-  $("salvar").onclick = async () => {
-    const lista = alvo, um = lista.length === 1, nome = $("nome").value.trim();
-    $("salvar").disabled = true;
-    const u = await db.from("rifa").update({status: statusSel, updated_at: new Date().toISOString()}).in("numero", lista);
-    let e2 = null;
-    if (!u.error){
-      if (statusSel === "livre" || (um && !nome)) e2 = (await db.from("rifa_nomes").delete().in("numero", lista)).error;
-      else if (nome) e2 = (await db.from("rifa_nomes").upsert(lista.map(n => ({numero:n, nome})))).error;
-      // vários números sem nome digitado: mantém os nomes que já existiam
-    }
-    $("salvar").disabled = false;
-    if (u.error || e2){ alert("Não salvou: " + (u.error||e2).message); return; }
-    lista.forEach(n => {
-      estado[n] = statusSel;
-      if (statusSel === "livre" || (um && !nome)) delete nomes[n];
-      else if (nome) nomes[n] = nome;
+  function pintar(linhas){
+    linhas.forEach(r => {
+      estado[r.numero] = r.status;
+      const n = r.numero, p = POS[n-1];
+      if (!p) return;
+      if (r.status === "livre"){
+        if (bolas[n]){ bolas[n].remove(); delete bolas[n]; }
+        return;
+      }
+      let b = bolas[n];
+      if (!b){
+        b = document.createElement("span");
+        b.setAttribute("aria-hidden","true");
+        b.style.left = p[0] + "%"; b.style.top = p[1] + "%";
+        folha.appendChild(b); bolas[n] = b;
+      }
+      b.className = "bola " + r.status;
     });
-    $("dlg").close();
-    if (multi) setMulti(false); else pintar();
+  }
+
+  $("copiar").onclick = async e => {
+    const limpo = C.PIX.replace(/\D/g, "");
+    try { await navigator.clipboard.writeText(limpo); e.target.textContent = "Copiado!"; }
+    catch(_){ e.target.textContent = "Pix: " + limpo; }
+    setTimeout(() => e.target.textContent = "Copiar chave Pix", 2500);
   };
 
-  $("entrar").onclick = async () => {
-    $("msg").textContent = "";
-    const { error } = await db.auth.signInWithPassword({ email: $("email").value.trim(), password: $("senha").value });
-    if (error) $("msg").textContent = "E-mail ou senha incorretos.";
-    else entrarApp();
-  };
-  $("senha").addEventListener("keydown", e => { if (e.key==="Enter") $("entrar").click(); });
-  $("sair").onclick = async () => { await db.auth.signOut(); location.reload(); };
+  // ---------- gerar imagem atualizada ----------
+  const FRAC_BOLA = 0.04;                 // diâmetro da bolinha = 4% da largura (igual ao CSS)
+  let arquivo = null, urlPrev = null;
+  const base = new Image(); base.src = "rifa.webp";
 
-  db.auth.getSession().then(({data}) => { if (data.session) entrarApp(); });
+  function bolinha(ctx, cx, cy, d, amarela){
+    const r = d/2, x0 = cx - r + 0.36*d, y0 = cy - r + 0.28*d;
+    const g = ctx.createRadialGradient(x0, y0, 0, x0, y0, d*0.9634);
+    const cores = amarela
+      ? [[0,"#ffe9a0"],[.40,"#f8c44a"],[.80,"#e39a17"],[1,"#c07a08"]]
+      : [[0,"#8cc1ff"],[.38,"#4a98f5"],[.78,"#2368d9"],[1,"#1a52b5"]];
+    cores.forEach(c => g.addColorStop(c[0], c[1]));
+    ctx.save();
+    ctx.shadowColor = "rgba(0,0,0,.45)"; ctx.shadowBlur = d*0.18; ctx.shadowOffsetY = d*0.1;
+    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI*2); ctx.fillStyle = g; ctx.fill();
+    ctx.restore();
+  }
+
+  $("gerar").onclick = async e => {
+    const btn = e.target; btn.disabled = true; btn.textContent = "Gerando…";
+    try {
+      await carregar();                    // pega o status mais recente antes de montar
+      await base.decode();
+      const w = base.naturalWidth, h = base.naturalHeight;
+      const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+      const ctx = cv.getContext("2d");
+      ctx.drawImage(base, 0, 0, w, h);
+      for (let i = 1; i <= C.TOTAL; i++){
+        const s = estado[i] || "livre";
+        if (s !== "livre") bolinha(ctx, POS[i-1][0]/100*w, POS[i-1][1]/100*h, w*FRAC_BOLA, s === "reservado");
+      }
+      const blob = await new Promise(res => cv.toBlob(res, "image/png"));
+      arquivo = new File([blob], "rifa-terceirao.png", { type: "image/png" });
+      if (urlPrev) URL.revokeObjectURL(urlPrev);
+      urlPrev = URL.createObjectURL(blob);
+      $("prev").src = urlPrev;
+      $("dlg-img").showModal();
+    } catch (err) {
+      alert("Não consegui gerar a imagem: " + err.message);
+    }
+    btn.disabled = false; btn.textContent = "Gerar imagem";
+  };
+  $("img-fechar").onclick = () => $("dlg-img").close();
+  $("img-baixar").onclick = () => {
+    const l = document.createElement("a");
+    l.href = urlPrev; l.download = "rifa-terceirao.png";
+    document.body.appendChild(l); l.click(); l.remove();
+  };
+  $("img-enviar").onclick = async () => {
+    if (navigator.canShare && navigator.canShare({ files: [arquivo] })){
+      try { await navigator.share({ files: [arquivo], title: "Rifa do Terceirão" }); } catch(_){}
+    } else $("img-baixar").click();
+  };
+
+  const db = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+  async function carregar(){
+    const { data, error } = await db.from("rifa").select("numero,status").order("numero");
+    if (!error) pintar(data);
+  }
+  carregar();
+  db.channel("rifa-publica").on("postgres_changes",{event:"*",schema:"public",table:"rifa"},carregar).subscribe();
+  setInterval(carregar, 30000);
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) carregar(); });
 })();
 </script>
 </body>
