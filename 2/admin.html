@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<link rel="icon" href="icon.png" type="image/png">
+<link rel="shortcut icon" href="icon.png">
+<link rel="icon" href="icon.png" type="image/png">
+<title>Admin · Rifa do Terceirão</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--azul:#040b5c;--azul-2:#0a1470;--creme:#fdf1c4}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--azul);color:var(--creme);font-family:Montserrat,system-ui,sans-serif;padding:20px 12px 40px}
+  main{max-width:560px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 4px}
+  .sub{margin:0 0 16px;font-size:13px;opacity:.8}
+  input,button{font:inherit}
+  input{width:100%;padding:12px;border-radius:8px;border:2px solid var(--creme);background:#030733;color:var(--creme);margin-bottom:10px}
+  .btn{background:var(--creme);color:var(--azul);border:0;border-radius:8px;padding:12px 16px;font-weight:800;cursor:pointer}
+  .btn.sec{background:transparent;color:var(--creme);border:2px solid var(--creme)}
+  .btn:focus-visible,input:focus-visible,.n:focus-visible{outline:3px solid #fff;outline-offset:2px}
+  #login{max-width:360px;margin:60px auto}
+  #app{display:none}
+  .topo{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:8px}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+  .stats div{background:#030733;border-radius:8px;padding:8px;text-align:center;font-size:11px}
+  .stats b{display:block;font-size:18px}
+  #grade{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:7px 5px}
+  .n{aspect-ratio:2.1/1;border-radius:50%;border:2.5px solid #000;background:var(--azul);color:var(--creme);
+     font-weight:800;font-size:clamp(8px,2.5vw,13px);cursor:pointer;padding:0;min-width:0;overflow:hidden;display:grid;place-content:center;position:relative}
+  .n.reservado{background:repeating-linear-gradient(45deg,#2b3390 0 3px,var(--azul) 3px 7px);border-color:var(--creme)}
+  .n.pago{background:var(--creme);color:var(--azul)}
+  .n.tem-nome::after{content:"";position:absolute;right:3px;top:2px;width:5px;height:5px;border-radius:50%;background:#ff8a5c}
+  .multi{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+  .multi .btn{padding:9px 14px;font-size:13px}
+  .multi .btn[aria-pressed="true"]{background:var(--creme);color:var(--azul)}
+  .multi .sub{margin:0;font-size:12px}
+  .n.sel{outline:3px solid #fff;outline-offset:1px;z-index:1}
+  #sel-bar{display:none;position:fixed;left:0;right:0;bottom:0;z-index:5;background:#030733;border-top:2px solid var(--creme);
+    padding:12px 12px calc(12px + env(safe-area-inset-bottom,0px));align-items:center;gap:8px}
+  #sel-bar .info{flex:1;font-weight:800;font-size:15px}
+  #sel-bar .btn{padding:11px 14px}
+  #sel-bar .btn:disabled{opacity:.4;cursor:default}
+  body.com-barra{padding-bottom:90px}
+  #dlg-lista{display:none;font-size:12px;margin:-6px 0 12px;max-height:64px;overflow:auto;opacity:.85}
+  dialog{border:0;border-radius:14px;background:var(--creme);color:var(--azul);padding:20px;width:min(92vw,360px)}
+  dialog::backdrop{background:rgba(0,0,20,.7)}
+  dialog h2{margin:0 0 12px;font-size:20px}
+  dialog input{background:#fff;color:var(--azul);border-color:var(--azul)}
+  .opcoes{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:12px}
+  .opcoes button{padding:10px 4px;border-radius:8px;border:2px solid var(--azul);background:transparent;color:var(--azul);font-weight:700;cursor:pointer}
+  .opcoes button[aria-pressed="true"]{background:var(--azul);color:var(--creme)}
+  .acoes{display:flex;gap:8px}
+  .acoes .btn{flex:1}
+  dialog .btn.sec{color:var(--azul);border-color:var(--azul)}
+  #msg{font-size:13px;min-height:18px;color:#ffb4a2}
+</style>
+</head>
+<body>
+<main>
+  <section id="login">
+    <h1>Entrar</h1>
+    <p class="sub">Área restrita da rifa.</p>
+    <input id="email" type="email" placeholder="E-mail" autocomplete="username">
+    <input id="senha" type="password" placeholder="Senha" autocomplete="current-password">
+    <button class="btn" id="entrar" style="width:100%">Entrar</button>
+    <p id="msg"></p>
+  </section>
+
+  <section id="app">
+    <div class="topo">
+      <div><h1>Rifa do Terceirão</h1><p class="sub" style="margin:0">Toque num número para alterar.</p></div>
+      <button class="btn sec" id="sair">Sair</button>
+    </div>
+    <div class="stats">
+      <div><b id="s-livre">0</b>livres</div>
+      <div><b id="s-res">0</b>reservados</div>
+      <div><b id="s-pago">0</b>pagos</div>
+      <div><b id="s-grana">R$0</b>arrecadado</div>
+    </div>
+    <div class="multi">
+      <button class="btn sec" id="multi" aria-pressed="false">Selecionar vários</button>
+      <p class="sub" id="dica"></p>
+    </div>
+    <div id="grade"></div>
+  </section>
+</main>
+
+<div id="sel-bar">
+  <span class="info" id="sel-n">0 selecionados</span>
+  <button class="btn sec" id="sel-limpar">Limpar</button>
+  <button class="btn" id="sel-ok" disabled>Confirmar</button>
+</div>
+
+<dialog id="dlg">
+  <h2 id="dlg-titulo">Número</h2>
+  <p id="dlg-lista"></p>
+  <div class="opcoes" id="opcoes">
+    <button data-s="livre">Livre</button>
+    <button data-s="reservado">Reservado</button>
+    <button data-s="pago">Pago</button>
+  </div>
+  <input id="nome" type="text" placeholder="Nome de quem comprou (opcional)">
+  <div class="acoes">
+    <button class="btn sec" id="cancelar">Cancelar</button>
+    <button class="btn" id="salvar">Salvar</button>
+  </div>
+</dialog>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<script>
+(function(){
+  const C = window.RIFA, $ = id => document.getElementById(id);
+  const db = supabase.createClient(C.SUPABASE_URL, C.SUPABASE_ANON_KEY);
+  let estado = {}, nomes = {}, alvo = [], statusSel = "livre";
+  let multi = false, sel = new Set(), ultimo = null;
+
+  const grade = $("grade"), celulas = {};
+  for (let i = 1; i <= C.TOTAL; i++){
+    const b = document.createElement("button");
+    b.className = "n"; b.textContent = i; b.onclick = e => clicar(i, e);
+    grade.appendChild(b); celulas[i] = b;
+  }
+
+  async function entrarApp(){
+    $("login").style.display = "none"; $("app").style.display = "block";
+    await carregar();
+    db.channel("rifa-admin").on("postgres_changes",{event:"*",schema:"public",table:"rifa"},carregar).subscribe();
+  }
+
+  async function carregar(){
+    const [a, b] = await Promise.all([
+      db.from("rifa").select("numero,status"),
+      db.from("rifa_nomes").select("numero,nome")
+    ]);
+    if (a.error || b.error){ alert("Erro ao carregar: " + (a.error||b.error).message); return; }
+    estado = {}; nomes = {};
+    a.data.forEach(r => estado[r.numero] = r.status);
+    b.data.forEach(r => { if (r.nome) nomes[r.numero] = r.nome; });
+    pintar();
+  }
+
+  function pintar(){
+    let l=0,r=0,p=0;
+    for (let i=1;i<=C.TOTAL;i++){
+      const s = estado[i] || "livre";
+      celulas[i].className = "n " + s + (nomes[i] ? " tem-nome" : "") + (sel.has(i) ? " sel" : "");
+      celulas[i].title = nomes[i] || "";
+      if (s==="livre") l++; else if (s==="reservado") r++; else p++;
+    }
+    $("s-livre").textContent=l; $("s-res").textContent=r; $("s-pago").textContent=p;
+    $("s-grana").textContent = "R$" + (p*C.PRECO);
+  }
+
+  function marcar(s){
+    statusSel = s;
+    document.querySelectorAll("#opcoes button").forEach(b => b.setAttribute("aria-pressed", b.dataset.s===s));
+  }
+  document.querySelectorAll("#opcoes button").forEach(b => b.onclick = () => marcar(b.dataset.s));
+
+  // ---------- seleção em massa ----------
+  function setMulti(on){
+    multi = on; if (!on){ sel.clear(); ultimo = null; }
+    $("multi").setAttribute("aria-pressed", on);
+    $("multi").textContent = on ? "Sair da seleção" : "Selecionar vários";
+    $("dica").textContent = on ? "Toque nos números e confirme." : "Ou segure Ctrl e clique.";
+    atualizarSel();
+  }
+  function atualizarSel(){
+    const n = sel.size;
+    $("sel-n").textContent = n === 1 ? "1 selecionado" : n + " selecionados";
+    $("sel-ok").disabled = n === 0;
+    $("sel-bar").style.display = multi ? "flex" : "none";
+    document.body.classList.toggle("com-barra", multi);
+    pintar();
+  }
+  function clicar(i, e){
+    if (multi || e.ctrlKey || e.metaKey || e.shiftKey){
+      if (!multi) setMulti(true);
+      if (e.shiftKey && ultimo){                       // Shift: seleciona do último até este
+        const [a, b] = [Math.min(ultimo, i), Math.max(ultimo, i)];
+        for (let k = a; k <= b; k++) sel.add(k);
+      } else if (sel.has(i)) sel.delete(i); else sel.add(i);
+      ultimo = i; atualizarSel();
+    } else abrir([i]);
+  }
+  $("multi").onclick = () => setMulti(!multi);
+  $("sel-limpar").onclick = () => { sel.clear(); ultimo = null; atualizarSel(); };
+  $("sel-ok").onclick = () => abrir([...sel].sort((a,b) => a-b));
+  setMulti(false);
+
+  function abrir(lista){
+    alvo = lista;
+    const um = lista.length === 1;
+    $("dlg-titulo").textContent = um ? "Número " + lista[0] : lista.length + " números";
+    $("dlg-lista").style.display = um ? "none" : "block";
+    $("dlg-lista").textContent = lista.join(", ");
+    $("nome").placeholder = um ? "Nome de quem comprou (opcional)" : "Nome de quem comprou (vale para todos)";
+    const nms = [...new Set(lista.map(n => nomes[n] || ""))];
+    $("nome").value = nms.length === 1 ? nms[0] : "";
+    const sts = [...new Set(lista.map(n => estado[n] || "livre"))];
+    marcar(um ? sts[0] : (sts.length === 1 && sts[0] !== "livre" ? sts[0] : "pago"));
+    $("dlg").showModal();
+  }
+  $("cancelar").onclick = () => $("dlg").close();
+
+  $("salvar").onclick = async () => {
+    const lista = alvo, um = lista.length === 1, nome = $("nome").value.trim();
+    $("salvar").disabled = true;
+    const u = await db.from("rifa").update({status: statusSel, updated_at: new Date().toISOString()}).in("numero", lista);
+    let e2 = null;
+    if (!u.error){
+      if (statusSel === "livre" || (um && !nome)) e2 = (await db.from("rifa_nomes").delete().in("numero", lista)).error;
+      else if (nome) e2 = (await db.from("rifa_nomes").upsert(lista.map(n => ({numero:n, nome})))).error;
+      // vários números sem nome digitado: mantém os nomes que já existiam
+    }
+    $("salvar").disabled = false;
+    if (u.error || e2){ alert("Não salvou: " + (u.error||e2).message); return; }
+    lista.forEach(n => {
+      estado[n] = statusSel;
+      if (statusSel === "livre" || (um && !nome)) delete nomes[n];
+      else if (nome) nomes[n] = nome;
+    });
+    $("dlg").close();
+    if (multi) setMulti(false); else pintar();
+  };
+
+  $("entrar").onclick = async () => {
+    $("msg").textContent = "";
+    const { error } = await db.auth.signInWithPassword({ email: $("email").value.trim(), password: $("senha").value });
+    if (error) $("msg").textContent = "E-mail ou senha incorretos.";
+    else entrarApp();
+  };
+  $("senha").addEventListener("keydown", e => { if (e.key==="Enter") $("entrar").click(); });
+  $("sair").onclick = async () => { await db.auth.signOut(); location.reload(); };
+
+  db.auth.getSession().then(({data}) => { if (data.session) entrarApp(); });
+})();
+</script>
+</body>
+</html>
